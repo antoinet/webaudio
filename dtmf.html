@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+ <head>
+	 <title>DTMF Tones</title>
+ </head>
+ <body>
+	 <table>
+		 <tr>
+			 <td><input type="button" value="1" data-freq1="697" data-freq2="1209"/></td>
+			 <td><input type="button" value="2" data-freq1="697" data-freq2="1336"/></td>
+			 <td><input type="button" value="3" data-freq1="697" data-freq2="1477"/></td>
+			 <td><input type="button" value="A" data-freq1="697" data-freq2="1633"/></td>
+		 </tr>
+		 <tr>
+			 <td><input type="button" value="4" data-freq1="770" data-freq2="1209"/></td>
+			 <td><input type="button" value="5" data-freq1="770" data-freq2="1336"/></td>
+			 <td><input type="button" value="6" data-freq1="770" data-freq2="1477"/></td>
+			 <td><input type="button" value="B" data-freq1="770" data-freq2="1633"/></td>
+		 </tr>
+		 <tr>
+			 <td><input type="button" value="7" data-freq1="852" data-freq2="1209"/></td>
+			 <td><input type="button" value="8" data-freq1="852" data-freq2="1336"/></td>
+			 <td><input type="button" value="9" data-freq1="852" data-freq2="1477"/></td>
+			 <td><input type="button" value="C" data-freq1="852" data-freq2="1633"/></td>
+		 </tr>
+		 <tr>
+			 <td><input type="button" value="*" data-freq1="941" data-freq2="1209"/></td>
+			 <td><input type="button" value="0" data-freq1="941" data-freq2="1336"/></td>
+			 <td><input type="button" value="#" data-freq1="941" data-freq2="1477"/></td>
+			 <td><input type="button" value="D" data-freq1="941" data-freq2="1633"/></td>
+		 </tr>
+	 </table>
+	 
+	 <script type="text/javascript">
+	 	window.AudioContext = window.AudioContext || window.webkitAudioContext;
+		context = new AudioContext();
+		
+	 	buttons = document.getElementsByTagName('input');
+	 	for (var i = 0; i < buttons.length; i++) {
+	 		var button = buttons[i];
+	 		button.onmousedown = function() {
+				// create oscillator sources and connect them to output
+				this.osc1 = context.createOscillator();
+				this.osc1.frequency.value = this.getAttribute('data-freq1');
+				this.osc1.connect(context.destination);
+				this.osc2 = context.createOscillator();
+				this.osc2.frequency.value = this.getAttribute('data-freq2');
+				this.osc2.connect(context.destination);
+				
+				this.osc1.start(0);
+				this.osc2.start(0);
+	 		}
+			
+			button.onmouseup = function() {
+				this.osc1.stop(0);
+				this.osc1.disconnect();
+				this.osc2.stop(0);
+				this.osc2.disconnect();
+			}
+	 	}
+	</script>
+ </body>
+</html>

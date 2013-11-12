@@ -5,8 +5,21 @@
 	 <script type="text/javascript" src="js/jquery-1.10.2.min.js"></script>
 	 <link rel="stylesheet" type="text/css" href="css/style.css"/>
 	 <script type="text/javascript">
+	 function getQueryStringParameters () {
+		params = {};
+		var queryString = document.URL.split('?')[1];
+		if (queryString) {
+			keyValues = queryString.split('&');
+			for (var i = 0; i < keyValues.length; i++) {
+				var parts = keyValues[i].split('=');
+				params[parts[0]] = parts[1];
+			}
+		}
+		return params;
+	 }
+	
 	 $(function() {
- 	 	window.AudioContext = window.AudioContext || window.webkitAudioContext;
+ 		window.AudioContext = window.AudioContext || window.webkitAudioContext;
  		context = new AudioContext();
 		
 		$('input[type=button]').each(function(idx, button) {
@@ -40,10 +53,12 @@
 			});
 		});
 		
+		// convert input to uppercase string
 		$('input[name=dtmf-string]').keyup(function() {
 			this.value = this.value.toUpperCase();
 		});
 		
+		// play back dtmf tone sequence
 		$('#dtmf-input').submit(function(event) {
 			dtmf = $('input[name=dtmf-string]').val().toUpperCase().split('');
 			function do_dtmf() {
@@ -59,6 +74,13 @@
 			do_dtmf();
 			event.preventDefault();
 		});
+		
+		// get dtmf string from query parameter dtmf-string
+		var qs_dtmf = getQueryStringParameters()['dtmf-string'];
+		if (qs_dtmf) {
+			$('input[name=dtmf-string]').val(qs_dtmf.toUpperCase());
+			$('#dtmf-input').submit();
+		}
 	 });
 	 </script>
  </head>
@@ -102,6 +124,9 @@
 	 
 	 <p>
 		This is a little demonstration of using the <a href="https://dvcs.w3.org/hg/audio/raw-file/tip/webaudio/specification.html">W3C Web Audio API</a> to generate <a href="http://en.wikipedia.org/wiki/Dual-tone_multi-frequency_signaling" target="_blank">DTMF</a> signals within your browser.
+	 </p>
+	 <p>
+		 <em>Hint:</em> Use the query parameter <tt>dtmf-string</tt> to automatically pass a DTMF string.
 	 </p>
  </body>
 </html>

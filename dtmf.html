@@ -2,35 +2,69 @@
 <html>
  <head>
 	 <title>DTMF Tones</title>
-	 <style type="text/css">
-	 body {
-		 font-family: Arial, Helvetica, sans-serif;
-	 }
-	 input[type=button] {
-		 width: 50px;
-		 height: 50px;
-		 color: white;
-		 font-weight: bold;
-		 font-size: 1.5em;
-	 }
-	 .blue {
-		 background-color: blue;
-	 }
-	 .red {
-		 background-color: red;
-	 }
-	 .gray {
-		 background-color: gray;
-	 }
-	 table {
-		 border: 1px solid black;
-		 margin: 50px auto;
-	 }
-	 </style>
+	 <script type="text/javascript" src="js/jquery-1.10.2.min.js"></script>
+	 <link rel="stylesheet" type="text/css" href="css/style.css"/>
+	 <script type="text/javascript">
+	 $(function() {
+ 	 	window.AudioContext = window.AudioContext || window.webkitAudioContext;
+ 		context = new AudioContext();
+		
+		$('input[type=button]').each(function(idx, button) {
+			// create a gain node to control output
+			button.gain1 = context.createGain();
+			button.gain1.gain.value = 0.0;
+			button.gain1.connect(context.destination);
+			
+			// create both oscillator sources
+			button.osc1 = context.createOscillator();
+			button.osc1.type = "sine";
+			button.osc1.frequency.value = button.getAttribute('data-freq1');
+			button.osc1.connect(button.gain1);
+			
+			button.osc2 = context.createOscillator();
+			button.osc2.type = "sine";
+			button.osc2.frequency.value = button.getAttribute('data-freq2');
+			button.osc2.connect(button.gain1);
+			
+			button.osc1.start(0);
+			button.osc2.start(0);
+			
+	 		$(button).mousedown(function() {
+				button.gain1.gain.value = 1.0;
+				$(button).toggleClass('active');
+	 		});
+			
+			$(button).mouseup(function() {
+				button.gain1.gain.value = 0.0;
+				$(button).toggleClass('active');
+			});
+		});
+		
+		$('input[name=dtmf-string]').keyup(function() {
+			this.value = this.value.toUpperCase();
+		});
+		
+		$('#dtmf-input').submit(function(event) {
+			dtmf = $('input[name=dtmf-string]').val().toUpperCase().split('');
+			function do_dtmf() {
+				char = dtmf.shift();
+				if (!char) return;
+				$('input[value=' + char +']').mousedown();
+				setTimeout(do_dtmf2, 100);
+			}
+			function do_dtmf2() {
+				$('input[value=' + char +']').mouseup();
+				setTimeout(do_dtmf, 30);
+			}
+			do_dtmf();
+			event.preventDefault();
+		});
+	 });
+	 </script>
  </head>
  <body>
 	 <h1>Dual Tone Multiple Frequency (DTMF) with WebAudio</h1>
-	 <table>
+	 <table class="center border">
 		 <tr>
 			 <td><input type="button" value="1" class="blue" data-freq1="697" data-freq2="1209"/></td>
 			 <td><input type="button" value="2" class="blue" data-freq1="697" data-freq2="1336"/></td>
@@ -57,43 +91,17 @@
 		 </tr>
 	 </table>
 	 
+	 <table class="center">
+		 <tr><td>
+			 <form id="dtmf-input">
+	 		 	<input type="text" name="dtmf-string" autocomplete="off" autofocus pattern="[0-9a-dA-D\*#]*" title="DTMF input string" placeholder="Type input here..."/>
+				<input type="submit" value="Play"/>
+			</form>
+		</tr></td>
+	</table>
+	 
 	 <p>
 		This is a little demonstration of using the <a href="https://dvcs.w3.org/hg/audio/raw-file/tip/webaudio/specification.html">W3C Web Audio API</a> to generate <a href="http://en.wikipedia.org/wiki/Dual-tone_multi-frequency_signaling" target="_blank">DTMF</a> signals within your browser.
 	 </p>
-	 <script type="text/javascript">
-	 	window.AudioContext = window.AudioContext || window.webkitAudioContext;
-		context = new AudioContext();
-		
-		
-	 	buttons = document.getElementsByTagName('input');
-	 	for (var i = 0; i < buttons.length; i++) {
-	 		var button = buttons[i];
-
-			// create a gain node to control output
-			button.gain1 = context.createGain();
-			button.gain1.gain.value = 0.0;
-			button.gain1.connect(context.destination);
-			
-			// create oscillator sources
-			button.osc1 = context.createOscillator();
-			button.osc1.frequency.value = button.getAttribute('data-freq1');
-			button.osc1.connect(button.gain1);
-			
-			button.osc2 = context.createOscillator();
-			button.osc2.frequency.value = button.getAttribute('data-freq2');
-			button.osc2.connect(button.gain1);
-			
-			button.osc1.start(0);
-			button.osc2.start(0);
-			
-	 		button.onmousedown = function() {
-				this.gain1.gain.value = 1.0;
-	 		}
-			
-			button.onmouseup = function() {
-				this.gain1.gain.value = 0.0;
-			}
-	 	}
-	</script>
  </body>
 </html>

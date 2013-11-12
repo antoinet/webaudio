@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Audio Stream Visualization with Web Audio API</title>
+		<script type="text/javascript" src="js/jquery-1.10.2.min.js"></script>
+		<link rel="stylesheet" type="text/css" href="css/style.css"/>
+		<script type="text/javascript">
+		navigator.getUserMedia = navigator.getUserMedia
+							|| navigator.webkitGetUserMedia
+							|| navigator.mozGetUserMedia
+							|| navigator.msGetUserMedia;
+		
+ 		window.AudioContext = window.AudioContext || window.webkitAudioContext;
+
+		window.requestAnimFrame = window.requestAnimationFrame
+							|| window.webkitRequestAnimationFrame
+							|| window.mozRequestAnimationFrame
+							|| window.oRequestAnimationFrame
+							|| window.msRequestAnimationFrame;
+							
+		context = new AudioContext();
+		
+		function onStream(stream) {
+			src = context.createMediaStreamSource(stream);
+			analyzer = context.createAnalyser();
+			src.connect(analyzer);
+			requestAnimFrame(visualize);
+		}
+		
+		function visualize() {
+			var drawContext = document.querySelector('canvas').getContext('2d');
+			
+			var times = new Uint8Array(analyzer.frequencyBinCount);
+			analyzer.getByteTimeDomainData(times);
+			for (var i = 0; i < times.length; i++) {
+				var value = times[i];
+				var percent = value/256;
+				var height = 640*percent;
+				var offset = 640 - height - 1;
+				var barWidth = 480/times.length;
+				drawContext.fillStyle = 'black';
+				drawContext.fillRect(i*barWidth, offset, 1, 1);
+			}
+			requestAnimFrame(visualize);
+		}
+		
+		$(function() {
+			navigator.getUserMedia({audio: true}, onStream, function(e) {
+				alert('Cannot access audio stream.');
+				console.log(e);
+			});
+		});
+
+		</script>
+	</head>
+	<body>
+		<canvas width="640" height="480"></canvas>
+	</body>
+</html>

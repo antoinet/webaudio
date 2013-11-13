@@ -23,21 +23,37 @@
 		function onStream(stream) {
 			src = context.createMediaStreamSource(stream);
 			analyzer = context.createAnalyser();
+			times = new Uint8Array(analyzer.frequencyBinCount);
+			freqs = new Uint8Array(analyzer.frequencyBinCount);
 			src.connect(analyzer);
 			requestAnimFrame(visualize);
 		}
 		
 		function visualize() {
-			var drawContext = document.querySelector('canvas').getContext('2d');
+			var canvas = document.querySelector('canvas');
+			var drawContext = canvas.getContext('2d');
+			drawContext.clearRect(0, 0, 640, 480);
 			
-			var times = new Uint8Array(analyzer.frequencyBinCount);
+			// draw frequency domain
+			analyzer.getByteFrequencyData(freqs);
+			for (var i = 0; i < freqs.length; i++) {
+				var value = freqs[i];
+				var percent = value/256;
+				var height = canvas.height*percent;
+				var offset = canvas.height - height - 1;
+				var barWidth = canvas.width/freqs.length;
+				drawContext.fillStyle = 'blue';
+				drawContext.fillRect(i*barWidth, offset, 1, 1);
+			}
+			
+			// draw time domain
 			analyzer.getByteTimeDomainData(times);
 			for (var i = 0; i < times.length; i++) {
 				var value = times[i];
 				var percent = value/256;
-				var height = 640*percent;
-				var offset = 640 - height - 1;
-				var barWidth = 480/times.length;
+				var height = canvas.height*percent;
+				var offset = canvas.height - height - 1;
+				var barWidth = canvas.width/times.length;
 				drawContext.fillStyle = 'black';
 				drawContext.fillRect(i*barWidth, offset, 1, 1);
 			}

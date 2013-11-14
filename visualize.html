@@ -3,61 +3,21 @@
 	<head>
 		<title>Audio Stream Visualization with Web Audio API</title>
 		<script type="text/javascript" src="js/jquery-1.10.2.min.js"></script>
+		<script type="text/javascript" src="js/shared.js"></script>
+		<script type="text/javascript" src="js/visualizer.js"></script>
 		<link rel="stylesheet" type="text/css" href="css/style.css"/>
-		<script type="text/javascript">
-		navigator.getUserMedia = navigator.getUserMedia
-							|| navigator.webkitGetUserMedia
-							|| navigator.mozGetUserMedia
-							|| navigator.msGetUserMedia;
 		
- 		window.AudioContext = window.AudioContext || window.webkitAudioContext;
-
-		window.requestAnimFrame = window.requestAnimationFrame
-							|| window.webkitRequestAnimationFrame
-							|| window.mozRequestAnimationFrame
-							|| window.oRequestAnimationFrame
-							|| window.msRequestAnimationFrame;
-							
+		<script type="text/javascript">
 		context = new AudioContext();
 		
 		function onStream(stream) {
-			src = context.createMediaStreamSource(stream);
-			analyzer = context.createAnalyser();
-			times = new Uint8Array(analyzer.frequencyBinCount);
-			freqs = new Uint8Array(analyzer.frequencyBinCount);
-			src.connect(analyzer);
-			requestAnimFrame(visualize);
-		}
-		
-		function visualize() {
+			var src = context.createMediaStreamSource(stream);
+			var analyser = context.createAnalyser();
+			analyser.fftSize = 64;
+			src.connect(analyser);
 			var canvas = document.querySelector('canvas');
-			var drawContext = canvas.getContext('2d');
-			drawContext.clearRect(0, 0, 640, 480);
-			
-			// draw frequency domain
-			analyzer.getByteFrequencyData(freqs);
-			for (var i = 0; i < freqs.length; i++) {
-				var value = freqs[i];
-				var percent = value/256;
-				var height = canvas.height*percent;
-				var offset = canvas.height - height - 1;
-				var barWidth = canvas.width/freqs.length;
-				drawContext.fillStyle = 'blue';
-				drawContext.fillRect(i*barWidth, offset, 1, 1);
-			}
-			
-			// draw time domain
-			analyzer.getByteTimeDomainData(times);
-			for (var i = 0; i < times.length; i++) {
-				var value = times[i];
-				var percent = value/256;
-				var height = canvas.height*percent;
-				var offset = canvas.height - height - 1;
-				var barWidth = canvas.width/times.length;
-				drawContext.fillStyle = 'black';
-				drawContext.fillRect(i*barWidth, offset, 1, 1);
-			}
-			requestAnimFrame(visualize);
+			var visualizer = new Visualizer(analyser, context.sampleRate, canvas);
+			visualizer.draw();
 		}
 		
 		$(function() {

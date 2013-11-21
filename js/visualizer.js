@@ -17,10 +17,10 @@ function Visualizer(analyser, sampleRate, canvas) {
 	this.tickSize = 20;
 	
 	this.minX = 0;
-	this.maxX = this.sampleRate/4;
-	this.minY = -10;
-	this.maxY = 5;
-	this.unitsPerTick = 1000;
+	this.maxX = this.sampleRate/2;
+	this.minY = 0;
+	this.maxY = 255;
+	this.unitsPerTick = 2*this.sampleRate/this.analyser.fftSize;
 	this.rangeX = this.maxX - this.minX;
 	this.rangeY = this.maxY - this.minY;
 	this.unitX = this.canvas.width/this.rangeX;
@@ -45,17 +45,16 @@ Visualizer.prototype.draw = function () {
 	
 	// clear canvas
 	context.clearRect(0, 0, width, height);
-	
-	//this.drawGrid();
-	this.drawXTicks();
+	context.fillStyle = 'black';
 	
 	// draw frequency spectrum
 	for (var i = 0; i < binCount; i++) {
 		var normalizedFreq = this.freqs[i]/256;
 		var binHeight = height*normalizedFreq;
-		context.fillStyle = 'black';
 		context.fillRect(i*binWidth, height - binHeight - 1, binWidth, height);
 	}
+	
+	this.drawXTicks();
 	
 	// draw
 	requestAnimFrame(this.draw.bind(this));
@@ -70,34 +69,28 @@ Visualizer.prototype.drawXTicks = function () {
 	context.font = this.font;
 	context.textAlign = 'center';
 	context.textBaseline = 'top';
+	context.strokeStyle='grey';
+	context.fillStyle='grey';
 	
-	xPos = this.centerX + xPosIncrement;
+	xPos = this.centerX;
 	unit = this.unitsPerTick;
 	while (xPos < this.canvas.width) {
-		context.moveTo(xPos, this.centerY - this.tickSize/2);
-		context.lineTo(xPos, this.centerY + this.tickSize/2);
+		// draw tick
+		context.moveTo(xPos, this.canvas.height - this.tickSize);
+		context.lineTo(xPos, this.canvas.height);
 		context.stroke();
-		context.fillText(unit/100, xPos, this.centerY + this.tickSize/2 + 3);
+		
+		// draw text
+		var text = Math.floor(unit) + ' Hz';
+		var textDims = context.measureText(text);
+		console.log(textDims);
+		context.save();
+			context.translate(xPos + xPosIncrement/2 - 4, this.canvas.height - 5 - textDims.width/2);
+			context.rotate(-Math.PI/2);
+			context.fillText(text, 0, 0);
+		context.restore();
 		unit += this.unitsPerTick;
 		xPos = Math.round(xPos + xPosIncrement);
-	}
-	context.restore();
-}
-
-Visualizer.prototype.drawGrid = function() {
-	var context = this.context;
-	var width = this.canvas.width;
-	var height = this.canvas.height;
-	var binCount = this.freqs.length/2;
-	var binWidth = width/binCount;
-	
-	context.save();
-	for (var i = 0; i < binCount; i++) {
-		context.beginPath();
-		context.moveTo(i*binWidth, 0);
-		context.lineTo(i*binWidth, height);
-		context.strokeStyle = '#cccccc';
-		context.stroke();
 	}
 	context.restore();
 }

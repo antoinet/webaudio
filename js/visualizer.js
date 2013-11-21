@@ -20,7 +20,7 @@ function Visualizer(analyser, sampleRate, canvas) {
 	this.maxX = this.sampleRate/2;
 	this.minY = 0;
 	this.maxY = 255;
-	this.unitsPerTick = 2*this.sampleRate/this.analyser.fftSize;
+	this.unitsPerTick = 10*2*this.sampleRate/this.analyser.fftSize;
 	this.rangeX = this.maxX - this.minX;
 	this.rangeY = this.maxY - this.minY;
 	this.unitX = this.canvas.width/this.rangeX;
@@ -45,12 +45,13 @@ Visualizer.prototype.draw = function () {
 	
 	// clear canvas
 	context.clearRect(0, 0, width, height);
-	context.fillStyle = 'black';
 	
 	// draw frequency spectrum
 	for (var i = 0; i < binCount; i++) {
 		var normalizedFreq = this.freqs[i]/256;
 		var binHeight = height*normalizedFreq;
+		var hue = i/binCount * 360;
+	    context.fillStyle = 'hsl(' + hue + ', 100%, 50%)';
 		context.fillRect(i*binWidth, height - binHeight - 1, binWidth, height);
 	}
 	

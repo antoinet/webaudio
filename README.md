@@ -5,6 +5,8 @@ Some examples of using the [W3C Web Audio API](https://dvcs.w3.org/hg/audio/raw-
 * [Dual Tone Multiple Frequency (DTMF) Modulation with the Web Audio API](http://antoinet.github.io/webaudio/dtmf-mod.html)
 * [Frequency Analyser](http://antoinet.github.io/webaudio/freq-analysis.html)
 
+Note: this is all javascript, no flash or other browser-plugin is used.
+
 
 #### Related links:
 

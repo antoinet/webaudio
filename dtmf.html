@@ -3,25 +3,13 @@
  <head>
 	 <title>Dual Tone Multiple Frequency (DTMF) with the Web Audio API</title>
 	 <script type="text/javascript" src="js/jquery-1.10.2.min.js"></script>
+	 <script type="text/javascript" src="js/shared.js"></script>
 	 <link rel="stylesheet" type="text/css" href="css/style.css"/>
 	 <script type="text/javascript">
-	 function getQueryStringParameters () {
-		params = {};
-		var queryString = document.URL.split('?')[1];
-		if (queryString) {
-			keyValues = queryString.split('&');
-			for (var i = 0; i < keyValues.length; i++) {
-				var parts = keyValues[i].split('=');
-				params[parts[0]] = parts[1];
-			}
-		}
-		return params;
-	 }
-	
 	 $(function() {
- 		window.AudioContext = window.AudioContext || window.webkitAudioContext;
  		context = new AudioContext();
 		
+		// define button with frequencies
 		$('input[type=button]').each(function(idx, button) {
 			// create a gain node to control output
 			button.gain1 = context.createGain();
@@ -42,7 +30,7 @@
 			button.osc1.start(0);
 			button.osc2.start(0);
 			
-	 		$(button).mousedown(function() {
+			$(button).mousedown(function() {
 				button.gain1.gain.value = 1.0;
 				$(button).toggleClass('active');
 	 		});
@@ -51,6 +39,20 @@
 				button.gain1.gain.value = 0.0;
 				$(button).toggleClass('active');
 			});
+		});
+		
+		// register key up/down handlers
+		$(document).keydown(function(event) {
+			var c = String.fromCharCode(event.which);
+			if (c.match(/[0-9a-dA-D\*#]/)) {
+				$('input[value=' + c + ']').mousedown();
+			}
+		});
+		$(document).keyup(function(event) {
+			var c = String.fromCharCode(event.which);
+			if (c.match(/[0-9a-dA-D\*#]/)) {
+				$('input[value=' + c + ']').mouseup();
+			}
 		});
 		
 		// convert input to uppercase string
@@ -64,11 +66,11 @@
 			function do_dtmf() {
 				char = dtmf.shift();
 				if (!char) return;
-				$('input[value=' + char +']').mousedown();
+				$('input[value=\'' + char +'\']').mousedown();
 				setTimeout(do_dtmf2, 100);
 			}
 			function do_dtmf2() {
-				$('input[value=' + char +']').mouseup();
+				$('input[value=\'' + char +'\']').mouseup();
 				setTimeout(do_dtmf, 30);
 			}
 			do_dtmf();
@@ -130,7 +132,7 @@
 	 <table class="center">
 		 <tr><td>
 			 <form id="dtmf-input">
-	 		 	<input type="text" name="dtmf-string" autocomplete="off" autofocus pattern="[0-9a-dA-D\*#]*" title="DTMF input string" placeholder="Type input here..."/>
+	 		 	<input type="text" name="dtmf-string" autocomplete="off" autofocus pattern="[0-9a-dA-D\\*#]*" title="DTMF input string" placeholder="Type input here..."/>
 				<input type="submit" value="Play"/>
 			</form>
 		</tr></td>

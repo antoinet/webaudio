@@ -16,3 +16,16 @@ window.requestAnimFrame = window.requestAnimationFrame
 					|| window.mozRequestAnimationFrame
 					|| window.oRequestAnimationFrame
 					|| window.msRequestAnimationFrame;
+
+function getQueryStringParameters () {
+	params = {};
+	var queryString = document.URL.split('?')[1];
+	if (queryString) {
+		keyValues = queryString.split('&');
+		for (var i = 0; i < keyValues.length; i++) {
+			var parts = keyValues[i].split('=');
+			params[parts[0]] = parts[1];
+		}
+	}
+	return params;
+}

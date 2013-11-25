@@ -11,14 +11,23 @@
 		context = new AudioContext();
 		
 		function onStream(stream) {
+			// init graph
 			var src = context.createMediaStreamSource(stream);
 			var analyser = context.createAnalyser();
 			analyser.fftSize = 512;
 			src.connect(analyser);
+			
+			// init canvas and viszalizer
 			var canvas = document.querySelector('canvas');
-			var visualizer = new Visualizer(analyser, context.sampleRate, canvas);
-			visualizer.draw();
-			document.getElementById('sample-rate').innerHTML = context.sampleRate;
+			var visualizer = new Visualizer(canvas);
+			var freqs = new Uint8Array(analyser.frequencyBinCount);
+			
+			// animation loop
+			(function animLoop() {
+				requestAnimFrame(animLoop);
+				analyser.getByteFrequencyData(freqs);
+				visualizer.draw(freqs, context.sampleRate);
+			})();
 		}
 		
 		$(function() {
@@ -35,8 +44,7 @@
 	 
 	 <h1>Frequency Analysis with the Web Audio API</h1>
 	 <table class="center">
-		 <tr><td><canvas width="320" height="240"></canvas></td></tr>
-		 <tr><td align="center">Sample Rate: <span id="sample-rate">-</span> Hz</td></td>
+		 <tr><td><canvas width="1024" height="240"></canvas></td></tr>
 	 </table>
 	 <p>
 		This is a little demonstration of using the <a href="https://dvcs.w3.org/hg/audio/raw-file/tip/webaudio/specification.html">W3C Web Audio API</a> to visualize the frequency spectrum of an audio source.

@@ -26,21 +26,28 @@
 	 
 	 // init analyser
 	 function onStream(stream) {
+		console.log('start audio capture...')
 		src = context.createMediaStreamSource(stream);
 		analyser = context.createAnalyser();
 		analyser.fftSize = fftSize;
 		src.connect(analyser);
 		freqs = new Uint8Array(analyser.frequencyBinCount);
+		setInterval(detect, 50);
 	 }
 	 
 	 function detect() {
-	 	analyser.getByteFrequencyData(freqs);
+		analyser.getByteFrequencyData(freqs);
 		value = freqValue(dtmfFreqs[0][0]);
-		console.log(value);
+		if (value > 20) {
+			document.getElementById('bli').innerHTML=value + ' bar';
+		} else {
+			document.getElementById('bli').innerHTML=value + ' foo';
+		}
 	 }
 	 
 	 function freqValue (freq) {
-		 var index = Math.round(freq*context.sampleRate*fftSize/2);
+		 var index = Math.round(freq/context.sampleRate/2*fftSize);
+		 console.log(index);
 		 return freqs[index];
 	 }
 	 </script>
@@ -49,5 +56,6 @@
  	 <a href="https://github.com/antoinet/webaudio"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_green_007200.png" alt="Fork me on GitHub"></a>
 	 
 	 <h1>Dual Tone Multiple Frequency (DTMF) Demodulation with the Web Audio API</h1>
+	 <span id="bli">foo</span>
  </body>
 </html>

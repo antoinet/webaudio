@@ -25,29 +25,28 @@ function Visualizer(canvas) {
 Visualizer.prototype.draw = function (freqArray, sampleRate) {
 	// some local variables for convenience
 	var context = this.context;
-	var width = this.canvas.width;
-	var height = this.canvas.height;
+	var canvasWidth = this.canvas.width;
+	var canvasHeight = this.canvas.height;
 	var binCount = freqArray.length;
-	var binWidth = sampleRate/binCount;
+	var binWidthInHz = sampleRate/binCount/2;
+	var binWidthInPixels = binWidthInHz*this.pixelsPerUnitX;
 
 	
 	// clear canvas
-	context.clearRect(0, 0, width, height);
+	context.clearRect(0, 0, canvasWidth, canvasHeight);
 	
 	// draw frequency spectrum
 	var i = Math.round(this.minX*binCount/sampleRate);
-	var unitX = i*binWidth;
-	var posX = (unitX - this.minX)*this.pixelsPerUnitX;
-	while (unitX <= this.maxX) {
-		var binHeight = height*freqArray[i];
-		var hue = unitX/this.rangeX * 360;
+	var freq = i*binWidthInHz;
+	var pos = (freq - this.minX)*this.pixelsPerUnitX;
+	while (freq <= this.maxX) {
+		var binHeightInPixels = canvasHeight*freqArray[i++]/256;
+		var hue = freq/this.rangeX * 360;
 	    context.fillStyle = 'hsl(' + hue + ', 100%, 50%)';
-		context.fillRect(posX, height - binHeight - 1, binWidth, height);
-		i++;
-		unitX += binWidth;
-		posX += binWidth*this.pixelsPerUnitX;
+		context.fillRect(pos, canvasHeight - binHeightInPixels - 1, binWidthInPixels, canvasHeight);
+		freq += binWidthInHz;
+		pos += binWidthInPixels;
 	}
-	
 	this.drawXTicks();
 	this.drawSampleRate(sampleRate);
 }

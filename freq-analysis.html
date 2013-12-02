@@ -14,7 +14,7 @@
 			// init graph
 			var src = context.createMediaStreamSource(stream);
 			var analyser = context.createAnalyser();
-			analyser.fftSize = 512;
+			analyser.fftSize = 1024;
 			src.connect(analyser);
 			
 			// init canvas and viszalizer
